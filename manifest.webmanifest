@@ -1,0 +1,10 @@
+{
+  "name": "Verse — lyrics, in the moment",
+  "short_name": "Verse",
+  "description": "A personal lyric canvas for iPad and Mac.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#090a0d",
+  "theme_color": "#090a0d",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
