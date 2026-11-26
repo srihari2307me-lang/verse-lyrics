@@ -1,0 +1,35 @@
+const styles=[
+{name:'Ship',category:'kinetic',description:'Words land one by one on a wall that drifts in 3D.',klass:'ship',icon:'↗'},
+{name:'Fisheye',category:'kinetic',description:'A tight stack of three words, bulging through a lens.',klass:'fisheye',icon:'◉'},
+{name:'Visual',category:'kinetic',description:'A centered stack, with a symbol beside the words.',klass:'visual',icon:'✦'},
+{name:'Fisheye Visual',category:'kinetic',description:'Fisheye, with symbols beside the words that have one.',klass:'fisheye-visual',icon:'✺'},
+{name:'Codestyle',category:'motion',description:'The lyric types out like code beneath a blinking cursor.',klass:'codestyle',icon:'⌘'},
+{name:'Codestyle Visual',category:'motion',description:'Code meets small illustrated word markers.',klass:'codestyle-visual',icon:'⌘'},
+{name:'Branches',category:'motion',description:'A line draws itself; every word lights a node.',klass:'branches',icon:'⌁'},
+{name:'Web',category:'motion',description:'Each line becomes a web, a strand for every word.',klass:'web',icon:'✳'},
+{name:'Constellation',category:'motion',description:'Each line traces a constellation, star by star.',klass:'constellation',icon:'✧'},
+{name:'Native Design',category:'native',description:'The song as a message thread, a bubble for every line.',klass:'native',icon:'▰'},
+{name:'Native Design Money',category:'native',description:'A run of payments, one for every line.',klass:'native-money',icon:'＄'},
+{name:'Native Design Map',category:'native',description:'A walk across the map, with a pin for every line.',klass:'native-map',icon:'⌖'},
+{name:'Native Design Notifications',category:'native',description:'Lines arrive as lock-screen alerts, stacks, and widgets.',klass:'native-notifications',icon:'▣'}];
+const $=q=>document.querySelector(q),$$=q=>[...document.querySelectorAll(q)];
+const state={style:'Visual',filter:'all',view:'listen',playing:true};
+const lyricStage=$('#lyric-stage'),fullStage=$('#fullscreen-stage');
+function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>e.classList.remove('show'),2500)}
+function applyStyle(n){state.style=n;const s=styles.find(x=>x.name===n);[lyricStage,fullStage].forEach(e=>{e.className=(e===fullStage?'fullscreen-stage':'lyric-stage')+' style-'+s.klass});$('#current-style-name').textContent=n;renderStyles();renderDrawer()}
+function renderStyles(){const q=$('#style-search').value.trim().toLowerCase(),a=styles.filter(s=>(state.filter==='all'||s.category===state.filter)&&s.name.toLowerCase().includes(q));$('#style-grid').innerHTML=a.map(s=>'<article class="style-card '+(s.name===state.style?'selected':'')+'" data-style="'+s.name+'"><div class="style-thumb thumb-'+s.klass+'"><div class="thumb-copy">It was late at night<br><span class="thumb-current">falling in love</span><br>There is something in the way</div></div><div class="style-card-title"><span>'+s.name+'</span><button data-pin="'+s.name+'">♡</button></div><p>'+s.description+'</p><div class="style-category">'+(s.category==='native'?'NATIVE DESIGN':s.category==='kinetic'?'KINETIC TYPE':'MOTION SCENE')+'</div></article>').join('');$$('.style-card').forEach(c=>c.addEventListener('click',()=>{applyStyle(c.dataset.style);toast(c.dataset.style+' selected')}));$$('[data-pin]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();b.textContent=b.textContent==='♡'?'♥':'♡';toast(b.textContent==='♥'?'Style saved':'Style removed from saved')}))}
+function renderDrawer(){$('#drawer-list').innerHTML=styles.map(s=>'<button class="drawer-style '+(s.name===state.style?'active':'')+'" data-drawer-style="'+s.name+'"><span class="drawer-swatch">'+s.icon+'</span><span><b>'+s.name+'</b><small>'+s.description+'</small></span><em>'+(s.name===state.style?'✓':'›')+'</em></button>').join('');$$('[data-drawer-style]').forEach(b=>b.addEventListener('click',()=>{applyStyle(b.dataset.drawerStyle);closeDrawer()}))}
+function openDrawer(){$('#style-drawer').classList.add('open');$('#style-drawer').setAttribute('aria-hidden','false')}
+function closeDrawer(){$('#style-drawer').classList.remove('open');$('#style-drawer').setAttribute('aria-hidden','true')}
+function showView(v){state.view=v;$$('.page').forEach(p=>p.classList.add('hidden'));$('#'+v+'-page').classList.remove('hidden');$$('.rail-item').forEach(b=>b.classList.toggle('active',b.dataset.view===v));$('#page-name').textContent=v==='listen'?'NOW PLAYING':v==='styles'?'ALL STYLES':'SAVED';if(v==='styles')renderStyles()}
+function openFull(){$('#fullscreen-lyrics').classList.remove('hidden');document.body.style.overflow='hidden'}
+function closeFull(){$('#fullscreen-lyrics').classList.add('hidden');document.body.style.overflow=''}
+renderStyles();renderDrawer();
+$$('.rail-item').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+['#choose-style','#fullscreen-style','#lyrics-menu'].forEach(q=>$(q).addEventListener('click',openDrawer));$('#close-drawer').addEventListener('click',closeDrawer);$('#drawer-scrim').addEventListener('click',closeDrawer);$('#expand-lyrics').addEventListener('click',openFull);$('#exit-fullscreen').addEventListener('click',closeFull);$('#bottom-style-link').addEventListener('click',()=>showView('styles'));$('#browse-styles').addEventListener('click',()=>showView('styles'));$('#next-style').addEventListener('click',()=>{let i=styles.findIndex(s=>s.name===state.style);applyStyle(styles[(i+1)%styles.length].name)});
+$('#style-search').addEventListener('input',renderStyles);$$('.filter-chip').forEach(b=>b.addEventListener('click',()=>{state.filter=b.dataset.filter;$$('.filter-chip').forEach(x=>x.classList.toggle('active',x===b));renderStyles()}));
+$('#play-button').addEventListener('click',()=>{state.playing=!state.playing;$('#play-button').textContent=state.playing?'Ⅱ':'▶';toast(state.playing?'Preview playing':'Preview paused')});$('#save-track').addEventListener('click',e=>{e.currentTarget.classList.toggle('saved');e.currentTarget.textContent=e.currentTarget.classList.contains('saved')?'♥':'♡'});
+['connect-button','connect-small'].forEach(id=>$('#'+id).addEventListener('click',()=>toast('Spotify sync needs account connection. Sample lyrics are shown.')));['settings-button','panel-settings','all-settings'].forEach(id=>$('#'+id).addEventListener('click',()=>toast('Quick settings are ready to use in this preview.')));
+$('#show-lyrics').addEventListener('change',e=>{document.querySelector('.lyrics-panel').style.opacity=e.target.checked?'1':'.38';toast(e.target.checked?'Lyrics are showing':'Lyrics are hidden')});$('#keep-awake').addEventListener('change',e=>toast(e.target.checked?'Keep screen awake enabled':'Keep screen awake disabled'));
+$('#lyric-size').addEventListener('input',e=>{let z=Number(e.target.value)/100;lyricStage.style.fontSize=(z*100)+'%';fullStage.style.fontSize=(z*100)+'%'});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeFull()}if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openDrawer()}});
